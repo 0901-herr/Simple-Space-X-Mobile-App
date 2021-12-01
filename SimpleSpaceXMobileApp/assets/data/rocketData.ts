@@ -1,15 +1,3 @@
-import { ImageSourcePropType } from "react-native";
-
-export interface IRocket {
-  id: string
-  title: string
-  location: string
-  image: ImageSourcePropType
-  // imageBig: string
-  type: string
-  description: string
-}
-
 export interface RocketInventory {
   id: string
   active: boolean
@@ -20,9 +8,10 @@ export interface RocketInventory {
 }
 
 export interface RocketInventoryData {
-  rocketInventory: RocketInventory[];
+  rockets: RocketInventory[];
 }
 
+/* 
 const rocketData: IRocket[] = [
   {
       id: 'rocket-1',
@@ -107,3 +96,4 @@ const rocketData: IRocket[] = [
 ]
 
 export default rocketData;
+*/

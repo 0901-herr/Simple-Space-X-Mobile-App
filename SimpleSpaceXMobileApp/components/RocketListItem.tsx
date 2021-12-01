@@ -1,26 +1,39 @@
 import React from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native'
 import colors from '../assets/colors/colors';
-import { IRocket } from '../assets/data/rocketData';
 import { RocketInventory } from '../assets/data/rocketData';
+import rocketImage from '../assets/images/rocketImage';
 
 export type RocketListItemProps = {
   rocketDetails: RocketInventory,
+  index: number,
+  rocketListLength: number,
   onPress: () => void; 
+};
+
+interface IRocketImage {
+  image: ImageSourcePropType
+}
+
+export const imageSelect = (network: string) => {
+  const networkArray: Record<string, ImageSourcePropType>  = {
+    'Falcon 1': rocketImage.image['Falcon 1'],
+    'Falcon 9': rocketImage.image['Falcon 9'],
+    'Falcon Heavy': rocketImage.image['Falcon Heavy'],
+    'Starship': rocketImage.image['Starship']
+  };
+
+  return networkArray[network];
 };
 
 const RocketListItem: React.FC<RocketListItemProps> = (item) => {
   return (
     <TouchableOpacity onPress={item.onPress}> 
       <View style={styles.itemWrapper}>
-          {/* <Image source={item.rocketDetails.image} style={styles.image}/> */}
-
+          <Image source={imageSelect(item.rocketDetails.name)} style={styles.image}/>
           <View style={styles.titlesWrapper}>
             <Text style={styles.title}>{item.rocketDetails.name}</Text>
             <View style={styles.subtitleWrapper}>
-              <Text style={styles.type}>{item.rocketDetails.type}</Text>
-
               <View style={styles.locationWrapper}>
                 <Image source={require('../assets/images/map.png')} style={styles.locationIcon}/>
                 <Text style={styles.location}>{item.rocketDetails.country}</Text>
@@ -46,7 +59,7 @@ const styles = StyleSheet.create({
   },
 
   titlesWrapper: {
-    marginTop: 12,
+    marginTop: 14,
     flexDirection: 'column',
   },
   title: {
@@ -57,7 +70,7 @@ const styles = StyleSheet.create({
 
   subtitleWrapper: {
     width: 130,
-    marginTop: 8,
+    marginTop: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: 'center',
@@ -68,6 +81,7 @@ const styles = StyleSheet.create({
   },
   locationWrapper: {
     flexDirection: "row",
+    alignItems: 'center',
   },
   locationIcon: {
     width: 11,

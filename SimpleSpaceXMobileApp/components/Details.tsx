@@ -1,19 +1,14 @@
 import * as React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground } from 'react-native';
-import { IRocket } from '../assets/data/rocketData'
-import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-
 import { Dimensions } from 'react-native'; 
+
 import colors from '../assets/colors/colors';
-import { RocketInventory } from '../assets/data/rocketData';
+import rocketImage from '../assets/images/rocketImage';
+import { imageSelect } from './RocketListItem';
 
 const height = Dimensions.get('window').height;
-
-// export type DetailsProps = {
-//     rocketDetails: IRocket,
-// };
  
 export type DetailsProps = NativeStackScreenProps<RootStackParamList, 'Details'>;
 
@@ -22,11 +17,11 @@ const Details: React.FC<DetailsProps> = ( {route, navigation}: DetailsProps) => 
     return (  
         <View style={styles.container}>
             {/* Upper background */}
-            {/* <ImageBackground source={item.rocketDetails.image} style={styles.backgroundImage}> */}
+            <ImageBackground source={imageSelect(item.rocketDetails.name)} style={styles.backgroundImage}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Image source={require('../assets/images/left-arrow.png')} style={styles.arrowBack}/>
                 </TouchableOpacity>
-            {/* </ImageBackground> */}
+            </ImageBackground>
             
             {/* Lower details */}
             <View style={styles.infoWrapper}>
