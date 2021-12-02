@@ -15,6 +15,8 @@ import {
 
 import colors from '../assets/colors/colors';
 import RocketListItem from './RocketListItem';
+import FilterItem from './FilterItem';
+import WelcomePopUp from './WelcomePopUp';
 
 const windowWidth = Dimensions.get('window').width;
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -26,12 +28,22 @@ export interface TaskState {
 const ROCKETS_DATA = gql`
   query GetRockets {
     rockets {
-        id
         active
+        boosters
         country
-        name
-        type
         description
+        diameter {
+            meters
+        }
+        height {
+            meters
+        }
+        mass {
+            kg
+        }
+        name
+        success_rate_pct
+        type
     }
   }
 `;
@@ -39,30 +51,33 @@ const ROCKETS_DATA = gql`
 const Home: React.FC<HomeProps> = ({navigation}) => {
     const { loading, data, error } = useQuery<RocketInventoryData>(ROCKETS_DATA);
 
-    if (loading) return <View><Text>Loading...</Text></View>
-    if (error) return <View><Text>{error}</Text></View>
-    
     const [rocketData, setRocketData] = useState<RocketInventoryData>();
     const [searchText, setSearchText] = useState<string>();
     const [filteredRocketData, setFilteredRocketData] = useState<RocketInventory[]>();
+    const [locationFilterData, setLocationFilterData] = useState<string[]>();
 
     // search function
     const searchFilterFunction = (searchText: string) => {
         setSearchText(searchText) 
         setRocketData(data)
-        console.log("searching...")
-        // console.log(rocketData)
+        
         let filteredData = rocketData?.rockets.filter(function (item) {
-            return item.name.includes(searchText);
+            return item.name.includes(searchText) || item.country.includes(searchText);
         }); 
 
-        for(let i = 0; i < 4; i++) {
-            console.log(rocketData?.rockets[i].name)
-        }
- 
-        // console.log(filteredData);
         setFilteredRocketData(filteredData);  
-      };
+    };
+    
+    const locationFilterFunction = (filterLocation: string) => {
+        setRocketData(data)
+        setSearchText(filterLocation) 
+
+        let filteredData = rocketData?.rockets.filter(function (item) {
+            return item.country.includes(filterLocation);
+        }); 
+
+        setFilteredRocketData(filteredData);  
+    };
     
     // render rocket list items
     const renderRocketListItem: ListRenderItem<RocketInventory> = ({ item, index }) => (
@@ -79,21 +94,53 @@ const Home: React.FC<HomeProps> = ({navigation}) => {
         />
     );
 
+      // filter options
+      const renderLocationFilter: ListRenderItem<string> = ({ item }) => (
+          <View>
+            <TouchableOpacity onPress={() => locationFilterFunction(item)}>    
+                <FilterItem  
+                    filterItemData={item}
+                />
+            </TouchableOpacity>
+           <View style={styles.bottomViewDivider} />
+        </View>
+    );
+
+    const getFilterLocation = () => {
+        let filterLocations: string[] = [] 
+        if (data != null) {
+            for (let i = 0; i < data.rockets.length; i++) { 
+                if (!filterLocations.includes(data.rockets[i].country)) {
+                    console.log(data.rockets[i].country);
+                    filterLocations.push(data.rockets[i].country)
+                }
+            }
+        }
+        console.log(filterLocations);
+        setLocationFilterData(filterLocations);
+    }
+
     // ref
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
     // variables
-    const snapPoints = useMemo(() => ['25%', '50%'], []);
+    const snapPoints = useMemo(() => ['25', '30%'], []);
 
     // callbacks
     const handlePresentModalPress = useCallback(() => {
+        getFilterLocation();
         bottomSheetModalRef.current?.present();
     }, []);
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
     }, []);
+    
 
+    if (loading) return <View><Text>Loading...</Text></View>
+    if (error) return <View><Text>{error}</Text></View>
+    
     return (  
+        <BottomSheetModalProvider>
             <View style={styles.container}>
                 <SafeAreaView>
                     <FlatList
@@ -122,7 +169,7 @@ const Home: React.FC<HomeProps> = ({navigation}) => {
                                     />
                                 </View> 
                                 <View style={styles.filterWrapper}>
-                                    <TouchableOpacity onPress={handlePresentModalPress}> 
+                                    <TouchableOpacity onPress={handlePresentModalPress}>    
                                         <View style={styles.filterLocationWrapper}>
                                             <Text style={styles.filterLocation}>location</Text>
                                         </View>
@@ -132,19 +179,29 @@ const Home: React.FC<HomeProps> = ({navigation}) => {
                             </>
                         }
                     />
+                    <WelcomePopUp />
                 </SafeAreaView>
-
-                {/* <BottomSheetModal
+        
+                <BottomSheetModal
                     ref={bottomSheetModalRef}
                     index={1}
                     snapPoints={snapPoints}
                     onChange={handleSheetChanges}
+                    style={styles.bottomSheet}
                     >
-                    <View style={styles.contentContainer}>
-                        <Text>Awesome 🎉</Text>
+                    <View style={styles.bottomSheetContainer}>
+                        <Text style={styles.bottomViewLargeTitle}>Location</Text>
+                        <FlatList
+                            data={locationFilterData}
+                            renderItem={renderLocationFilter}
+                            keyExtractor={(item) => item}
+                            showsHorizontalScrollIndicator={false}
+                            style={styles.bottomSheetFlatListView}
+                        />
                     </View>
-                </BottomSheetModal> */}
+                </BottomSheetModal>
             </View>
+        </BottomSheetModalProvider>
     );
 }
 
@@ -212,10 +269,38 @@ const styles = StyleSheet.create ({
         color: colors.black,
     },
 
-    contentContainer: {
+    bottomSheetContainer: {
         flex: 1,
         alignItems: 'center',
     },    
+
+    bottomSheet: {
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: -2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+      },
+    bottomViewLargeTitle: {
+        width: windowWidth*0.9,
+        alignItems: 'flex-start',
+        marginTop: 15,
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+    bottomSheetFlatListView: {
+        flexDirection: 'column',
+        marginTop: 15,
+    },
+    bottomViewDivider: {
+        height: StyleSheet.hairlineWidth,
+        width: windowWidth * 0.9,
+        backgroundColor: colors.darkGray,
+        marginHorizontal: 16,
+        marginTop: 15,
+    }
 })
  
 export default Home;

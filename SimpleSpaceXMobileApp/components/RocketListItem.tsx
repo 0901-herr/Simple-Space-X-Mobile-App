@@ -11,10 +11,6 @@ export type RocketListItemProps = {
   onPress: () => void; 
 };
 
-interface IRocketImage {
-  image: ImageSourcePropType
-}
-
 export const imageSelect = (network: string) => {
   const networkArray: Record<string, ImageSourcePropType>  = {
     'Falcon 1': rocketImage.image['Falcon 1'],

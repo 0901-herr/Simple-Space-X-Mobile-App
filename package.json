@@ -4,7 +4,12 @@
     "@react-navigation/native": "^6.0.6",
     "@react-navigation/native-stack": "^6.2.5",
     "graphql": "^16.0.1",
+    "react-native-gesture-handler": "^2.0.0",
+    "react-native-pagination": "^1.5.5",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "^3.9.0"
+  },
+  "devDependencies": {
+    "metro-config": "^0.66.2"
   }
 }

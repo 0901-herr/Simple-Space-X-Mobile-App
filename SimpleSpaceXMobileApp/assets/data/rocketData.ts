@@ -4,6 +4,10 @@ export interface RocketInventory {
   country: string
   name: string
   type: string
+  diameter: {meters: number}
+  height: {meters: number}
+  mass: {kg: number}
+  success_rate_pct: number
   description: string
 }
 
