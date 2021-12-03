@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, FlatList, ListRenderItem, TextInput, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomSheetModal, BottomSheetModalProvider, } from '@gorhom/bottom-sheet';
-import { gql, useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client'
 
 import { RootStackParamList } from '../types';
 import { RocketInventoryData } from '../assets/data/rocketData';
@@ -17,13 +17,10 @@ import ROCKETS_DATA from '../services/spaceXService';
 import filterData from '../assets/data/filterData';
 import { FilterData } from '../assets/data/filterData';
 
+
 const windowWidth = Dimensions.get('window').width;
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
-
-export interface TaskState {
-    task: string
-}
 
 const Home: React.FC<HomeProps> = ({navigation}) => {
     const { loading, data, error } = useQuery<RocketInventoryData>(ROCKETS_DATA);
@@ -67,7 +64,7 @@ const Home: React.FC<HomeProps> = ({navigation}) => {
         </TouchableOpacity>
     )
 
-    // render filter options
+    // render bottom modal filter options
     const renderLocationFilter: ListRenderItem<string> = ({ item }) => (
         <View>
             <TouchableOpacity onPress={() => searchFilterFunction(item)}>    
@@ -107,7 +104,7 @@ const Home: React.FC<HomeProps> = ({navigation}) => {
 
     // loading data
     if (loading) return <ActivityIndicator style={styles.loading}/>
-
+    
     // handling errors
     if (error) return <View style={styles.errorMessage}><Text>{error}</Text></View>
     
@@ -123,7 +120,7 @@ const Home: React.FC<HomeProps> = ({navigation}) => {
         ListHeaderComponent = {
             <>
             <View style={styles.titleWrapper}>
-                <Text style={styles.largeTitle}>Spaceships</Text>
+                <Text style={styles.largeTitle}>Rockets</Text>
             </View>
 
             <View style={styles.divider} />
