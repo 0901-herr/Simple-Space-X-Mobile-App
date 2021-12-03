@@ -1,25 +1,15 @@
 import React from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native'
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
 import colors from '../assets/colors/colors';
 import { RocketInventory } from '../assets/data/rocketData';
-import rocketImage from '../assets/images/rocketImage';
+import { imageSelect } from '../assets/images/rocketImage';
+
 
 export type RocketListItemProps = {
   rocketDetails: RocketInventory,
   index: number,
   rocketListLength: number,
   onPress: () => void; 
-};
-
-export const imageSelect = (network: string) => {
-  const networkArray: Record<string, ImageSourcePropType>  = {
-    'Falcon 1': rocketImage.image['Falcon 1'],
-    'Falcon 9': rocketImage.image['Falcon 9'],
-    'Falcon Heavy': rocketImage.image['Falcon Heavy'],
-    'Starship': rocketImage.image['Starship']
-  };
-
-  return networkArray[network];
 };
 
 const RocketListItem: React.FC<RocketListItemProps> = (item) => {

@@ -1,8 +1,8 @@
-import React, { useCallback, useRef, useMemo, useState, useEffect } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View, ImageBackground } from 'react-native';
+import React, { useState } from 'react';
+import { Modal, StyleSheet, Text, Pressable, View, ImageBackground } from 'react-native';
 import { Dimensions } from 'react-native'; 
-import { color } from 'react-native-reanimated';
 import colors from '../assets/colors/colors';
+
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -17,7 +17,6 @@ const WelcomePopUp: React.FC = () => {
           transparent={true}
           visible={modalVisible}
           onRequestClose={() => {
-            // Alert.alert("Modal has been closed.");
             setModalVisible(!modalVisible);
           }}
         >
@@ -26,7 +25,7 @@ const WelcomePopUp: React.FC = () => {
                     <View style={styles.welcomeTextWrapper}>
                         <Text style={styles.modalTitle}>Welcome</Text>
                         <Text style={styles.modalText}>
-                            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters.
+                          Simple Space X Mobile App helps you easier to search for all rockets from SpaceX. This is made possible by using the SpaceX API. You could use the search and filter funciton to get your intended result, and also tap on the listed rockets to view a more detail description of the selected rocket.
                         </Text>
                     </View>
                     <Pressable
@@ -55,14 +54,7 @@ const WelcomePopUp: React.FC = () => {
         height: windowHeight*0.48,
         backgroundColor: "white",
         alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 2,
-          height: 2
-        },
         borderRadius: 30,
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
         elevation: 5
       },
       welcomeTextWrapper: {
@@ -84,7 +76,7 @@ const WelcomePopUp: React.FC = () => {
       buttonStart: {
         marginTop: 100,
         marginHorizontal: 20,
-        width: windowWidth*0.45,
+        width: windowWidth*0.38,
         borderRadius: 25,
         borderWidth: 2,
         borderColor: colors.white,
@@ -97,7 +89,6 @@ const WelcomePopUp: React.FC = () => {
           fontSize: 14,
           textAlign: 'center',
           color: colors.white,
-        //   fontWeight: 'bold',
       }    
   });
   

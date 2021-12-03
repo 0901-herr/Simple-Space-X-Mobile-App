@@ -5,8 +5,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Dimensions } from 'react-native'; 
 
 import colors from '../assets/colors/colors';
-import rocketImage from '../assets/images/rocketImage';
-import { imageSelect } from './RocketListItem';
+import { imageSelect } from '../assets/images/rocketImage';
+
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -15,67 +15,86 @@ export type DetailsProps = NativeStackScreenProps<RootStackParamList, 'Details'>
 
 const Details: React.FC<DetailsProps> = ( {route, navigation}: DetailsProps) => {
     const item = route.params;
-    const activeMessage = <View style={styles.rocketActiveStatus}><Text style={styles.rocketActiveText}>active</Text></View>;
-    const inactiveMessage = <View style={styles.rocketInactiveStatus}><Text style={styles.rocketInactiveText}>inactive</Text></View>;
+
+    const upperBackground =
+        <ImageBackground source={imageSelect(item.rocketDetails.name)} style={styles.backgroundImage}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image source={require('../assets/images/left-arrow.png')} style={styles.arrowBack}/>
+            </TouchableOpacity>
+        </ImageBackground>
+
+    const rocketSatus = 
+        <View style={[styles.rocketStatus, item.rocketDetails.active ? styles.rocketActiveStatus : styles.rocketInactiveStatus]}>  
+            {item.rocketDetails.active ? 
+            <Text style={styles.rocketActiveText}>
+                active
+            </Text> : 
+            <Text style={styles.rocketInactiveText}>
+                inactive
+            </Text>}
+        </View>; 
+    
+    const lowerTopDetails = 
+        <View style={styles.titlesWrapper}>
+            <View style={styles.bigTitlesWrapper}>
+                <Text style={styles.rocketTitle}>{item.rocketDetails.name}</Text>
+                {rocketSatus}
+            </View>
+            <View style={styles.subTitlesWrapper}>
+                <View style={styles.rocketSubtitleWrapper}>
+                    <Image source={require('../assets/images/rocket.png')} style={styles.icon}/>
+                    <Text style={styles.rocketSubtitle}>{item.rocketDetails.type}</Text>
+                </View>
+                <View style={styles.rocketCountrySubtitleWrapper}>
+                    <Image source={require('../assets/images/map-black.png')} style={styles.icon}/>
+                    <Text style={styles.rocketSubtitle}>{item.rocketDetails.country}</Text>
+                </View>
+            </View>
+        </View>
+
+    const lowerBottomDetails =
+        <View style={styles.infoWrapper}>
+            <View style={styles.rocketDescriptionWrapper}>
+                <Text style={styles.infoTitle}>DESCRIPTION</Text>
+                <Text style={styles.rocketDescription}>{item.rocketDetails.description}</Text>
+            </View>
+
+            <View style={styles.horiInfo}>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoTitle}>HEIGHT</Text>
+                    <Text style={styles.infoText}>{item.rocketDetails.height.meters} m</Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoTitle}>DIAMETER</Text>
+                    <Text style={styles.infoText}>{item.rocketDetails.diameter.meters} m</Text>
+                </View>                
+            </View>
+
+            <View style={styles.horiInfo}>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoTitle}>MASS</Text>
+                    <Text style={styles.infoText}>{item.rocketDetails.mass.kg} kg</Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoTitle}>SUCCESS PCT</Text>
+                    <Text style={styles.infoText}>{item.rocketDetails.success_rate_pct} %</Text>
+                </View>                
+            </View>
+        </View>
+    
+    const lowerDetails =
+        <View style={styles.infoWrapper}>
+            {lowerTopDetails}
+            {lowerBottomDetails}
+        </View>
+
     return (  
         <View style={styles.container}>
             {/* Upper background */}
-            <ImageBackground source={imageSelect(item.rocketDetails.name)} style={styles.backgroundImage}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Image source={require('../assets/images/left-arrow.png')} style={styles.arrowBack}/>
-                </TouchableOpacity>
-            </ImageBackground>
-            
+            {upperBackground}
+
             {/* Lower details */}
-            <View style={styles.infoWrapper}>
-                <View style={styles.titlesWrapper}>
-                    <View style={styles.bigTitlesWrapper}>
-                        <Text style={styles.rocketTitle}>{item.rocketDetails.name}</Text>
-                        {item.rocketDetails.active ? activeMessage : inactiveMessage}
-                    </View>
-                    <View style={styles.subTitlesWrapper}>
-                        <View style={styles.rocketSubtitleWrapper}>
-                            <Image source={require('../assets/images/rocket.png')} style={styles.icon}/>
-                            <Text style={styles.rocketSubtitle}>{item.rocketDetails.type}</Text>
-                        </View>
-                        <View style={styles.rocketCountrySubtitleWrapper}>
-                            <Image source={require('../assets/images/map-black.png')} style={styles.icon}/>
-                            <Text style={styles.rocketSubtitle}>{item.rocketDetails.country}</Text>
-                        </View>
-                    </View>
-                </View>
-
-                
-
-                <View style={styles.infoWrapper}>
-                    <View style={styles.rocketDescriptionWrapper}>
-                        <Text style={styles.infoTitle}>DESCRIPTION</Text>
-                        <Text style={styles.rocketDescription}>{item.rocketDetails.description}</Text>
-                    </View>
-
-                    <View style={styles.horiInfo}>
-                        <View style={styles.infoItem}>
-                            <Text style={styles.infoTitle}>HEIGHT</Text>
-                            <Text style={styles.infoText}>{item.rocketDetails.height.meters} m</Text>
-                        </View>
-                        <View style={styles.infoItem}>
-                            <Text style={styles.infoTitle}>DIAMETER</Text>
-                            <Text style={styles.infoText}>{item.rocketDetails.diameter.meters} m</Text>
-                        </View>                
-                    </View>
-
-                    <View style={styles.horiInfo}>
-                        <View style={styles.infoItem}>
-                            <Text style={styles.infoTitle}>MASS</Text>
-                            <Text style={styles.infoText}>{item.rocketDetails.mass.kg} kg</Text>
-                        </View>
-                        <View style={styles.infoItem}>
-                            <Text style={styles.infoTitle}>SUCCESS PCT</Text>
-                            <Text style={styles.infoText}>{item.rocketDetails.success_rate_pct} %</Text>
-                        </View>                
-                    </View>
-                </View>
-            </View>
+            {lowerDetails}
        </View>
     );
 }
@@ -108,26 +127,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    rocketActiveStatus: {
+    rocketStatus: {
         paddingVertical: 7,
         paddingHorizontal: 15, 
         borderWidth: 1,
-        borderColor: '#1AA65A',
         borderRadius: 35,
     },
-    rocketActiveText: {
+    rocketStatusText: {
         fontSize: 11,
+    },
+    rocketActiveStatus: {
+        borderColor: '#1AA65A',
+    },
+    rocketActiveText: {
         color: '#1AA65A',
     },
     rocketInactiveStatus: {
-        paddingVertical: 7,
-        paddingHorizontal: 15, 
-        borderWidth: 1,
         borderColor: '#E74B1A',
-        borderRadius: 35,
     },
     rocketInactiveText: {
-        fontSize: 11,
         color: '#E74B1A',
     },
     rocketTitle: {
@@ -159,22 +177,12 @@ const styles = StyleSheet.create({
         width: 12,
         height: 12,
     },
-    divider: {
-        height: StyleSheet.hairlineWidth,
-        color: colors.black,
-        marginVertical: 10,
-        marginHorizontal: 16,
-    },
     infoWrapper: {
         flex: 1,
         backgroundColor: colors.white,
         marginTop: -20,
         borderRadius: 25,
         paddingTop: 10,
-    },
-
-    rocketCountry: {
-
     },
     rocketDescriptionWrapper: {
         marginTop: 25, 
@@ -198,7 +206,7 @@ const styles = StyleSheet.create({
         width: windowWidth * 0.5
     },
     infoText: {
-        fontSize: 18,
+        fontSize: 16,
         marginTop: 5,
     },
 });

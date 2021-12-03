@@ -6,5 +6,4 @@ export type RootStackParamList = {
         rocketDetails: RocketInventory,
         index: number
     };
-    Welcome: undefined;
 };

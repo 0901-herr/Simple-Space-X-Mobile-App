@@ -1,6 +1,7 @@
-import React, { useCallback, useRef, useMemo, useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, SafeAreaView, FlatList, ListRenderItem, TextInput, Image, TouchableOpacity } from 'react-native';
+import React, { useCallback, useRef, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, ListRenderItem, TextInput, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { BottomSheetModal, BottomSheetModalProvider, } from '@gorhom/bottom-sheet';
 import { gql, useQuery } from '@apollo/client'
 
 import { RootStackParamList } from '../types';
@@ -8,72 +9,36 @@ import { RocketInventoryData } from '../assets/data/rocketData';
 import { RocketInventory } from '../assets/data/rocketData';
 import { Dimensions } from 'react-native'; 
 
-import {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-} from '@gorhom/bottom-sheet';
-
 import colors from '../assets/colors/colors';
 import RocketListItem from './RocketListItem';
 import FilterItem from './FilterItem';
 import WelcomePopUp from './WelcomePopUp';
+import ROCKETS_DATA from '../services/spaceXService';
+import filterData from '../assets/data/filterData';
+import { FilterData } from '../assets/data/filterData';
 
 const windowWidth = Dimensions.get('window').width;
+
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export interface TaskState {
     task: string
 }
 
-const ROCKETS_DATA = gql`
-  query GetRockets {
-    rockets {
-        active
-        boosters
-        country
-        description
-        diameter {
-            meters
-        }
-        height {
-            meters
-        }
-        mass {
-            kg
-        }
-        name
-        success_rate_pct
-        type
-    }
-  }
-`;
-
 const Home: React.FC<HomeProps> = ({navigation}) => {
     const { loading, data, error } = useQuery<RocketInventoryData>(ROCKETS_DATA);
-
+    
     const [rocketData, setRocketData] = useState<RocketInventoryData>();
     const [searchText, setSearchText] = useState<string>();
     const [filteredRocketData, setFilteredRocketData] = useState<RocketInventory[]>();
     const [locationFilterData, setLocationFilterData] = useState<string[]>();
-
+    
     // search function
     const searchFilterFunction = (searchText: string) => {
-        setSearchText(searchText) 
         setRocketData(data)
-        
+        setSearchText(searchText) 
         let filteredData = rocketData?.rockets.filter(function (item) {
             return item.name.includes(searchText) || item.country.includes(searchText);
-        }); 
-
-        setFilteredRocketData(filteredData);  
-    };
-    
-    const locationFilterFunction = (filterLocation: string) => {
-        setRocketData(data)
-        setSearchText(filterLocation) 
-
-        let filteredData = rocketData?.rockets.filter(function (item) {
-            return item.country.includes(filterLocation);
         }); 
 
         setFilteredRocketData(filteredData);  
@@ -93,11 +58,19 @@ const Home: React.FC<HomeProps> = ({navigation}) => {
             }
         />
     );
+    
+    const renderFilterItem: ListRenderItem<FilterData> = ({item}) => (
+        <TouchableOpacity onPress={handlePresentModalPress}>    
+            <View style={styles.filterLocationWrapper}>
+                <Text style={styles.filterLocation}>{item.title}</Text>
+            </View>
+        </TouchableOpacity>
+    )
 
-      // filter options
-      const renderLocationFilter: ListRenderItem<string> = ({ item }) => (
-          <View>
-            <TouchableOpacity onPress={() => locationFilterFunction(item)}>    
+    // render filter options
+    const renderLocationFilter: ListRenderItem<string> = ({ item }) => (
+        <View>
+            <TouchableOpacity onPress={() => searchFilterFunction(item)}>    
                 <FilterItem  
                     filterItemData={item}
                 />
@@ -105,80 +78,85 @@ const Home: React.FC<HomeProps> = ({navigation}) => {
            <View style={styles.bottomViewDivider} />
         </View>
     );
-
+    
+    // get all location of rockets data
     const getFilterLocation = () => {
         let filterLocations: string[] = [] 
         if (data != null) {
             for (let i = 0; i < data.rockets.length; i++) { 
                 if (!filterLocations.includes(data.rockets[i].country)) {
-                    console.log(data.rockets[i].country);
                     filterLocations.push(data.rockets[i].country)
                 }
             }
         }
-        console.log(filterLocations);
         setLocationFilterData(filterLocations);
     }
 
-    // ref
+    // bottom sheet modal
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-    // variables
     const snapPoints = useMemo(() => ['25', '30%'], []);
 
-    // callbacks
     const handlePresentModalPress = useCallback(() => {
         getFilterLocation();
         bottomSheetModalRef.current?.present();
     }, []);
+
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
     }, []);
-    
 
-    if (loading) return <View><Text>Loading...</Text></View>
-    if (error) return <View><Text>{error}</Text></View>
+    // loading data
+    if (loading) return <ActivityIndicator style={styles.loading}/>
+
+    // handling errors
+    if (error) return <View style={styles.errorMessage}><Text>{error}</Text></View>
     
+    const rocketsList = 
+        <FlatList
+            columnWrapperStyle={{justifyContent: 'space-between'}}
+            numColumns={2}
+            data={filteredRocketData && (searchText!=null && searchText.length > 0) ? filteredRocketData : data?.rockets}
+            renderItem={renderRocketListItem}
+            keyExtractor={item => item.name}
+            style={styles.flatListView}
+
+        ListHeaderComponent = {
+            <>
+            <View style={styles.titleWrapper}>
+                <Text style={styles.largeTitle}>Spaceships</Text>
+            </View>
+
+            <View style={styles.divider} />
+            
+            <View style={styles.searchWrapper}>
+                <View style={styles.input}>
+                    <Image source={require('../assets/images/search.png')} style={styles.searchIcon}/>
+                    <TextInput
+                        onChangeText={text => searchFilterFunction(text)}
+                        value={searchText}
+                        placeholder="search rockets"
+                        style={styles.textInput}
+                    />
+                </View> 
+                <View style={styles.filterWrapper}>
+                    <FlatList
+                        horizontal
+                        data={filterData}
+                        renderItem={renderFilterItem}
+                        keyExtractor={item => item.id}
+                        style={styles.horiFlatListView}
+                    />
+                </View>
+            </View>  
+            </>
+        }
+    />
+
     return (  
         <BottomSheetModalProvider>
             <View style={styles.container}>
                 <SafeAreaView>
-                    <FlatList
-                        columnWrapperStyle={{justifyContent: 'space-between'}}
-                        numColumns={2}
-                        data={filteredRocketData && (searchText!=null && searchText.length > 0) ? filteredRocketData : data?.rockets}
-                        renderItem={renderRocketListItem}
-                        keyExtractor={item => item.id}
-                        style={styles.flatListView}
-
-                        ListHeaderComponent = {
-                            <>
-                            <View style={styles.titleWrapper}>
-                                <Text style={styles.largeTitle}>Spaceships</Text>
-                                </View>
-                            <View style={styles.divider} />
-                            
-                            <View style={styles.searchWrapper}>
-                                <View style={styles.input}>
-                                    <Image source={require('../assets/images/search.png')} style={styles.searchIcon}/>
-                                    <TextInput
-                                        onChangeText={text => searchFilterFunction(text)}
-                                        value={searchText}
-                                        placeholder="search rockets"
-                                        style={styles.textInput}
-                                    />
-                                </View> 
-                                <View style={styles.filterWrapper}>
-                                    <TouchableOpacity onPress={handlePresentModalPress}>    
-                                        <View style={styles.filterLocationWrapper}>
-                                            <Text style={styles.filterLocation}>location</Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>  
-                            </>
-                        }
-                    />
+                    {rocketsList}
                     <WelcomePopUp />
                 </SafeAreaView>
         
@@ -210,6 +188,15 @@ const styles = StyleSheet.create ({
         flex: 1,
         color: colors.white,
     },
+
+    // loading
+    loading: {
+        color: "#0000ff",
+        marginTop: 400,
+        justifyContent: 'space-around',
+    },
+
+    // header
     titleWrapper: {
         marginTop: 20,
         paddingHorizontal: 16,
@@ -224,10 +211,8 @@ const styles = StyleSheet.create ({
         marginHorizontal: 16,
         marginTop: 16,
     },
-    flatListView: {
-        height: '100%',
-    },
 
+    // search and filter
     searchWrapper: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -251,14 +236,16 @@ const styles = StyleSheet.create ({
         width: 12,
         height: 12,
     },
+    horiFlatListView: {
+        width: windowWidth*0.35,
+    },
     filterWrapper: {
         marginTop: 20,
-        marginRight: 20,
     },
     filterLocationWrapper: {
         paddingVertical: 8,
         paddingHorizontal: 15,
-        width: windowWidth*0.225,
+        marginLeft: 10, 
         borderColor: colors.black,
         borderWidth: 1,
         borderRadius: 60,
@@ -269,11 +256,16 @@ const styles = StyleSheet.create ({
         color: colors.black,
     },
 
+    // rocket list
+    flatListView: {
+        height: '100%',
+    },
+
+    // filter options
     bottomSheetContainer: {
         flex: 1,
         alignItems: 'center',
     },    
-
     bottomSheet: {
         shadowColor: "#000",
         shadowOffset: {
@@ -300,6 +292,10 @@ const styles = StyleSheet.create ({
         backgroundColor: colors.darkGray,
         marginHorizontal: 16,
         marginTop: 15,
+    },
+    
+    errorMessage: {
+        width: windowWidth*0.5
     }
 })
  

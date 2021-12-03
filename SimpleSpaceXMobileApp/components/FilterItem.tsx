@@ -1,8 +1,5 @@
 import React from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native'
-import colors from '../assets/colors/colors';
-import { RocketInventory } from '../assets/data/rocketData';
-import rocketImage from '../assets/images/rocketImage';
+import { View, Text, StyleSheet } from 'react-native'
 import { Dimensions } from 'react-native'; 
 
 const windowWidth = Dimensions.get('window').width;
